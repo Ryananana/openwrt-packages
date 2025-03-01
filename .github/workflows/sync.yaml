@@ -1,6 +1,3 @@
-Here is the formatted content of your GitHub Actions workflow file:
-
-```yaml
 name: Custom Repository Sync
 
 on:
@@ -105,4 +102,3 @@ Synced at: $(date -u "+%Y-%m-%d %H:%M:%S UTC")"
           # 使用带身份验证的 URL 进行推送
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin main || echo "No changes to push"
-```

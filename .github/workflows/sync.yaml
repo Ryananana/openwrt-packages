@@ -75,4 +75,7 @@ jobs:
           done
 
       - name: Push changes
-        run: git push origin main || echo "No changes to push"
+        run: |
+          # 使用带身份验证的 URL 进行推送
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin main || echo "No changes to push"

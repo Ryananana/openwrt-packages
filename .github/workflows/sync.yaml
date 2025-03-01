@@ -28,6 +28,7 @@ jobs:
             
             # 同步多个文件 - 放入指定文件夹
             ["luci-theme-argon"]="https://github.com/jerrykuku/luci-theme-argon.git master . false"
+            ["luci-app-argon-config"]="https://github.com/jerrykuku/luci-app-argon-config.git master . false"
           )
           
           # 遍历并同步每个来源

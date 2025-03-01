@@ -8,6 +8,8 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 显式声明需要写入权限
     steps:
       - name: Checkout your repository
         uses: actions/checkout@v3

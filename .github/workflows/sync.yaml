@@ -42,6 +42,18 @@ jobs:
             # 克隆源仓库的特定分支
             git clone --depth 1 --single-branch --branch "$branch" "$repo_url" "$temp_dir"
             
+            # 获取源仓库最新提交信息
+            cd "$temp_dir"
+            latest_commit_hash=$(git log -1 --format="%H")
+            latest_commit_date=$(git log -1 --format="%ad" --date=iso)
+            latest_commit_msg=$(git log -1 --format="%s")
+            cd - > /dev/null
+            
+            echo "Latest commit in $repo_url ($branch):"
+            echo "  Hash: $latest_commit_hash"
+            echo "  Date: $latest_commit_date"
+            echo "  Message: $latest_commit_msg"
+            
             # 确保目标目录存在
             mkdir -p "$dest"
             
@@ -69,7 +81,16 @@ jobs:
             # 如果有变更，添加到 git
             if [[ `git status "$dest" --porcelain` ]]; then
               git add "$dest"
-              git commit -m "Update $dest from $repo_url ($branch:$src_path)" || true
+              
+              # 创建包含源仓库更新时间的提交消息
+              commit_msg="Update $dest from $repo_url ($branch:$src_path)
+              
+Source commit: $latest_commit_hash
+Update time: $latest_commit_date
+Commit message: $latest_commit_msg
+Synced at: $(date -u "+%Y-%m-%d %H:%M:%S UTC")"
+              
+              git commit -m "$commit_msg" || true
               echo "Changes committed for $dest"
             else
               echo "No changes for $dest"

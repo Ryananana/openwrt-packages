@@ -1,10 +1,9 @@
-name: Sync Upstream Repo
+name: Custom Repository Sync
 
-# 每天一次定时触发，也可以根据需求调整，如："0 3 * * *"表示每天凌晨3点执行
 on:
   schedule:
-    - cron: '0 3 * * *'
-  workflow_dispatch:
+    - cron: '0 3 * * *'  # 每天UTC时间3点执行
+  workflow_dispatch:      # 允许手动触发
 
 jobs:
   sync:
@@ -17,25 +16,63 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Add upstream remote
-        run: |
-          # 将此处的地址替换为你想同步的仓库地址
-          git remote add upstream https://github.com/vernesong/OpenClash.git
       
-      - name: Fetch upstream
-        run: git fetch upstream
-
-      - name: Merge upstream changes using subtree
+      - name: Sync multiple repositories with custom folder structure
         run: |
-          # 如果你希望同步其他分支，例如 dev 分支中的 package/special 文件夹
-          # 将 "upstream/main" 修改为 "upstream/dev"，并将 --prefix 参数修改为你需要的目录路径
-          git subtree pull --prefix=luci-app-openclash upstream dev --squash || echo "No updates"
+          # 定义同步源数组 - 格式: [目标路径]="源仓库URL 分支 源路径 是否为文件夹(true/false)"
+          declare -A sources=(
+            # 同步整个文件夹 - 保留原始文件夹名称
+            ["luci-app-openclash"]="https://github.com/vernesong/OpenClash.git dev luci-app-openclash true"
+            
+            # 同步多个文件 - 放入指定文件夹
+            ["luci-theme-argon"]="https://github.com/jerrykuku/luci-theme-argon.git master . false"
+            
+          )
+          
+          # 遍历并同步每个来源
+          for dest in "${!sources[@]}"; do
+            IFS=' ' read -r repo_url branch src_path is_folder <<< "${sources[$dest]}"
+            echo "Syncing from $repo_url ($branch:$src_path) to $dest (is folder: $is_folder)"
+            
+            # 创建临时目录
+            temp_dir=$(mktemp -d)
+            
+            # 克隆源仓库的特定分支
+            git clone --depth 1 --single-branch --branch "$branch" "$repo_url" "$temp_dir"
+            
+            # 确保目标目录存在
+            mkdir -p "$dest"
+            
+            if [ "$is_folder" = "true" ]; then
+              # 如果是文件夹，保留原始结构
+              if [ -d "$temp_dir/$src_path" ]; then
+                # 清空目标目录，然后复制
+                rm -rf "$dest"/* 2>/dev/null || true
+                cp -rf "$temp_dir/$src_path"/* "$dest"/ 2>/dev/null || true
+              fi
+            else
+              # 如果是多个文件，放入指定文件夹
+              if [ "$src_path" = "." ]; then
+                # 源是根目录，复制所有文件
+                cp -rf "$temp_dir"/* "$dest"/ 2>/dev/null || true
+              else
+                # 源是特定路径，复制该路径下的所有内容
+                cp -rf "$temp_dir/$src_path"/* "$dest"/ 2>/dev/null || true
+              fi
+            fi
+            
+            # 清理临时目录
+            rm -rf "$temp_dir"
+            
+            # 如果有变更，添加到 git
+            if [[ `git status "$dest" --porcelain` ]]; then
+              git add "$dest"
+              git commit -m "Update $dest from $repo_url ($branch:$src_path)" || true
+              echo "Changes committed for $dest"
+            else
+              echo "No changes for $dest"
+            fi
+          done
 
-      - name: Push changes if any
-        run: |
-          if [[ `git status --porcelain` ]]; then
-            git push origin main
-          else
-            echo "No changes to push"
-          fi
+      - name: Push changes
+        run: git push origin main || echo "No changes to push"

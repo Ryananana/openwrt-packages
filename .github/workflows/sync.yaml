@@ -1,3 +1,6 @@
+下面是修复后的 `sync.yaml` 文件：
+
+```yaml
 name: Custom Repository Sync
 
 on:
@@ -28,7 +31,6 @@ jobs:
             
             # 同步多个文件 - 放入指定文件夹
             ["luci-theme-argon"]="https://github.com/jerrykuku/luci-theme-argon.git master . false"
-            
           )
           
           # 遍历并同步每个来源
@@ -79,7 +81,7 @@ jobs:
             rm -rf "$temp_dir"
             
             # 如果有变更，添加到 git
-            if [[ `git status "$dest" --porcelain` ]]; then
+            if [[ $(git status "$dest" --porcelain) ]]; then
               git add "$dest"
               
               # 修复：确保使用正确的多行字符串格式
@@ -102,3 +104,6 @@ Synced at: $(date -u "+%Y-%m-%d %H:%M:%S UTC")"
           # 使用带身份验证的 URL 进行推送
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin main || echo "No changes to push"
+```
+
+修复后的文件确保了正确的 YAML 语法和多行字符串格式。

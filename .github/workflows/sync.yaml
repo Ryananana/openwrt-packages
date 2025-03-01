@@ -82,9 +82,9 @@ jobs:
             if [[ `git status "$dest" --porcelain` ]]; then
               git add "$dest"
               
-              # 创建包含源仓库更新时间的提交消息
+              # 修复：确保使用正确的多行字符串格式
               commit_msg="Update $dest from $repo_url ($branch:$src_path)
-              
+
 Source commit: $latest_commit_hash
 Update time: $latest_commit_date
 Commit message: $latest_commit_msg

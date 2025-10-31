@@ -664,8 +664,11 @@ check_mod()
    if container; then
       return 0
    fi
-   
-   if [ -f /proc/config.gz ] && zcat /proc/config.gz | grep -q "CONFIG_${1^^}=y"; then
+
+   # Convert module name to uppercase using POSIX-compatible syntax
+   # BusyBox tr doesn't support [:lower:]/[:upper:], use a-z/A-Z instead
+   module_upper=$(echo "$1" | tr a-z A-Z)
+   if [ -f /proc/config.gz ] && zcat /proc/config.gz | grep -q "CONFIG_${module_upper}=y"; then
       return 0
    fi
    
@@ -678,8 +681,7 @@ check_mod()
       return 0
    fi
    
-   LOG_OUT "Error:【$1】module not found, please check your system depends and try again!"
-   start_fail
+   LOG_OUT "Error:【$1】module not found, please check your system depends if something abnormal!"
 } >/dev/null 2>&1
 
 check_core_status()
@@ -762,12 +764,12 @@ check_core_status()
    fi
 
    # redirect dns setting after core started, prevent core dns lookup failure
-   change_dns "$enable_redirect_dns"
-   set_firewall
-
    if [ "$1" == "start" ]; then
+      change_dns "$enable_redirect_dns"
+      set_firewall
       LOG_OUT "Tip: OpenClash Start Successful!"
    else
+      set_firewall
       LOG_OUT "Tip: Firewall Reload Successful!"
    fi
 } >/dev/null 2>&1
@@ -3777,7 +3779,6 @@ reload_service()
       fi
       LOG_OUT "【${CUR_RELOAD_NUM}/$MAX_RELOAD】Reload OpenClash Firewall Rules..."
       revert_firewall
-      revert_dnsmasq
       do_run_mode
       get_config
       check_core_status &
@@ -3786,7 +3787,6 @@ reload_service()
    if pidof clash >/dev/null && [ "$enable" == "1" ] && [ "$1" == "manual" ]; then
       LOG_OUT "Manually Reload Firewall Rules..."
       revert_firewall
-      revert_dnsmasq
       do_run_mode
       get_config
       check_core_status &

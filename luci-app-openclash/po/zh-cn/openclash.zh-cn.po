@@ -1428,9 +1428,6 @@ msgstr "正在安装新版本，更新过程请不要刷新页面和进行其他
 msgid "Installation failed..."
 msgstr "软件包安装失败..."
 
-msgid "Tip: OpenClash update successful, about to restart!"
-msgstr "提示：OpenClash 更新成功，即将进行重启！"
-
 msgid "Error: OpenClash update failed after 3 attempts, the file is saved in /tmp/openclash.ipk, please try to update manually with"
 msgstr "错误：OpenClash 更新失败，文件保存在 /tmp/openclash.ipk，请尝试以下命令手动更新"
 
@@ -1838,6 +1835,9 @@ msgstr "守护程序：因日志大小限制，清理所有日志内容..."
 
 msgid "Watchdog: Setting Firewall For Rules Order..."
 msgstr "守护程序：检测到防火墙规则顺序有误，修改插件防火墙规则..."
+
+msgid "Watchdog: Setting Firewall For IP Rules Table Recreate..."
+msgstr "守护程序：检测到路由表异常，重置插件防火墙规则..."
 
 msgid "Watchdog: Force Reset DNS Hijack..."
 msgstr "守护程序：重新设置 Dnsmasq 的 DNS 转发选项..."

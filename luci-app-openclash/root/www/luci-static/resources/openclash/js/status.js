@@ -2693,7 +2693,7 @@ var ocLang = window.ocLang || '';
             }
             this.resetBuffer(Date.now());
             this.metrics = {
-                traffic: { unit: ' MB/s', series: [{ key: 'up', name: '<%:Up%>' }, { key: 'down', name: '<%:Down%>' }] },
+                traffic: { unit: ' MB/s', series: [{ key: 'up', name: '<%:Upload%>' }, { key: 'down', name: '<%:Download%>' }] },
                 memory: { unit: ' MB', series: [{ key: 'mem', name: '<%:Ram%>' }] },
                 cpu: { unit: ' %', series: [{ key: 'cpu', name: '<%:CPU%>' }] },
                 load: { unit: ' %', series: [{ key: 'load', name: '<%:Load Avg%>' }] },
@@ -4376,7 +4376,7 @@ var ocLang = window.ocLang || '';
         if (isEnabled) LogManager.markCoreStart();
         LogManager.startLogDisplay(isEnabled ? '<%:Starting...%>' : '<%:Stopping...%>', false, 'init');
         XHR.get('<%=url("admin", "services", "openclash", "action")%>', requestParams, function(x, status) {
-            if (x && x.status == 200) {
+            if (x && x.status == 200 && status && status.status === 'success') {
                 setTimeout(function() {
                     pluginToggleUserAction = false;
                     updatePluginToggleState(StateManager.current_status.clash || false);
@@ -4542,7 +4542,7 @@ var ocLang = window.ocLang || '';
             if (restartBtn) {
                 restartBtn.disabled = false;
             }
-            if (x && x.status == 200) {
+            if (x && x.status == 200 && status && status.status === 'success') {
                 setTimeout(function() {
                     pluginToggleUserAction = false;
                     updatePluginToggleState(StateManager.current_status.clash || false);
